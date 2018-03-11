@@ -12,8 +12,8 @@ CONFFILE=~/.camenc
 # Load or create a hash identifier for this device.
 #
 [ -f $CONFFILE ] && \
-    HASH=`cat $CONFFILE` || \
-    HASH=`cat /sys/class/net/*/address | md5sum | cut -f1 -d" "` && \
+    HASH=$(cat $CONFFILE) || \
+    HASH=$(echo "$(date) $(cat /sys/class/net/*/address)" | md5sum | cut -f1 -d' ') && \
     echo $HASH > $CONFFILE
 
 # Take pictures forever.
