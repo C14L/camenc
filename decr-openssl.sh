@@ -2,6 +2,7 @@
 
 BASEDIR=$(dirname "$0")
 FILES=$1
+DATADIR=$(dirname $FILES)
 
 echo "Extracting image in: $DATADIR ..."
 
