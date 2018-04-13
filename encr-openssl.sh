@@ -17,8 +17,6 @@ POSTURL=http://192.168.0.94:8000/add
     HASH=$(echo "$(date) $(cat /sys/class/net/*/address)" | md5sum | cut -f1 -d' ') && \
     echo $HASH > $CONFFILE
 
-# http --form POST http://192.168.0.94:8000/add uid=123abc456def file@webcam-1523646646.jpg.enc
-
 # Take pictures forever.
 #
 while [ true ]; do
@@ -33,7 +31,7 @@ while [ true ]; do
         -outform DER $EXECDIR/public-key.pem | \
       tee $FILENAME >/dev/null 2>$DATADIR/error.log
 
-  http --form POST $POSTURL uid=$HASH file@$FILENAME
+  curl -F "uid=$HASH" -F "file=@$FILENAME" $POSTURL
 
   #echo "File written: $FILENAME"
   sleep $INTERVAL
