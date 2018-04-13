@@ -1,21 +1,62 @@
-import os.path
+import logging
+import os
 import re
 
 from datetime import datetime
 
 from django.shortcuts import render
-from django.http import HttpResponse, \
-                        HttpResponseNotFound, \
-                        HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 
 
-PICS_DIR = os.path.join(settings.BASE_DIR, 'pics')
+log = logging.getLogger(__name__)
 
-RE_VALID_UPLOAD_NAME = re.compile(r'^[a-z0-9]{32}$')
+# PICS_DIR = os.path.join(settings.BASE_DIR, 'pics')
+PICS_DIR = '/tmp/pics'
+if not os.path.exists(PICS_DIR):
+    os.mkdir(PICS_DIR, 0o755)
+
+RE_VALID_UPLOAD_NAME = re.compile(r'^[a-z0-9]{6}-\d{10}\.jpg.enc$')
 
 KiB = 1024
+
+
+def hello(request):
+    return HttpResponse('Hello!')
+
+
+@csrf_exempt
+def add(request):
+    upload = request.FILES['file']
+    uid = request.POST['uid']
+
+    log.info('uid, upload.name: ', uid, upload.name)
+
+    # if not RE_VALID_UPLOAD_NAME.match(upload.name):
+    #     return HttpResponseBadRequest('Invalid upload data.')
+
+    data_dir = os.path.join(PICS_DIR, uid)
+    if not os.path.exists(data_dir):
+        os.mkdir(data_dir, 0o755)
+    if os.path.exists(os.path.join(data_dir, '.upload-disabled')):
+        return HttpResponseNotAllowed('Upload disabled.')
+
+    file_name = '{}.jpg.enc'.format(int(datetime.timestamp(datetime.utcnow()) * 1000))
+    full_path = os.path.join(data_dir, file_name)
+    with open(full_path, 'wb+') as fh:
+        for chunk in upload.chunks():
+            fh.write(chunk)
+
+    # Integrity check: verify file size if reasonable for an image.
+    file_size = os.path.getsize(full_path)  # Bytes
+    if file_size < 10 * KiB:
+        return HttpResponseBadRequest('File size too small for a camenc image.')
+    if file_size > 500 * KiB:
+        os.remove(full_path)  # delete large files.
+        return HttpResponseBadRequest('File size too large for a camenc image.')
+
+    return HttpResponse()
 
 
 """
@@ -46,40 +87,3 @@ pic files are timestamped on the server-side, so that the client
 can't temper with the file's upload time.
 
 """
-
-
-@csrf_exempt
-def add(request):
-    upload = request.FILES['file']
-
-    if not RE_VALID_UPLOAD_NAME.match(upload.name):
-        return HttpResponseBadRequest('Invalid upload data.')
-
-    data_dir = os.path.join(PICS_DIR, upload.name)
-
-    if not os.path.exists(data_dir):
-        os.mkdir(data_dir)
-
-    if os.path.exists(os.path.join(data_dir, '.upload-disabled')):
-        return HttpResponseNotAllowed('Upload disabled.')
-
-    file_name = str(int(datetime.timestamp(datetime.utcnow()) * 1000))
-
-    full_path = os.path.join(data_dir, file_name)
-
-    with open(full_path, 'wb+') as fh:
-        for chunk in upload.chunks():
-            fh.write(chunk)
-
-    # Integrity check: verify file size if reasonable for an image.
-    file_size = os.path.getsize(full_path)  # Bytes
-
-    if file_size < 10 * KiB:
-        return HttpResponseBadRequest('File size too small for a camenc image.')
-
-    if file_size > 500 * KiB:
-        os.remove(full_path)  # delete large files.
-        return HttpResponseBadRequest('File size too large for a camenc image.')
-
-    return HttpResponse()
-
