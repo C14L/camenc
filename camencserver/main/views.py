@@ -21,9 +21,11 @@ RE_VALID_UPLOAD_NAME = re.compile(r'^[a-z0-9]{6}-\d{10}\.jpg.enc$')
 
 KiB = 1024
 
+MAX_FILES = 20000  # Max number of files kept in the pics dir. Oldest files are deleted.
 
-def hello(request):
-    return HttpResponse('Hello!')
+
+def home(request):
+    return HttpResponse('This is the endpoint for camenc security camera image storage.')
 
 
 @csrf_exempt
@@ -56,34 +58,14 @@ def add(request):
         os.remove(full_path)  # delete large files.
         return HttpResponseBadRequest('File size too large for a camenc image.')
 
+    # Keep number of files below maximum.
+    diff = len(os.listdir(data_dir)) - MAX_FILES
+    if diff > 0:
+        # Delete `diff` oldest files.
+        li = [(x.path, int(x.stat().st_ctime)) for x in os.scandir(d) if x.path.endswith('.enc')]
+        li.sort(key=lambda x: x[1])
+        li = li[:diff]  # only need the files with lowest timestamp vals
+        for f, t in li:
+            os.remove(f)
+
     return HttpResponse()
-
-
-"""
-Pairing via USB. On first start up, create 32 Bytes md5 string as
-perpetual and unique ID for the cam.
-
-Connect via USB to PC and use WebUSB to open website with setup
-page. Auth using the md5 string.
-
-Ask user for WLAN auth to setup the cam's WLAN via the Javascript
-from the browser. If WLAN was already set up, offer option to
-delete (not edit) old setting.
-
-On startup, if md5 string and WLAN setup found and connection
-possible, automatically start taking and uploading images.
-
-Pipe images directly throught to the CURL upload command,
-without touching the local disk.
-
-----------
-
-Uploads are always made using the same filename that consists of a
-cam specific random 32 char string. Pics uploaded with that string
-are placed in a sub-folder named with that string. Each filename
-in that sub-folder has a timestamp as it's file name. That way, all
-files posted from one device are always in one sub-folder, and all
-pic files are timestamped on the server-side, so that the client
-can't temper with the file's upload time.
-
-"""
