@@ -6,7 +6,7 @@ INTERVAL=1
 #PICSIZE=1920x1080
 PICSIZE=960x540
 CONFFILE=~/.camenc
-POSTURL=http://192.168.0.94:8000/add
+POSTURL=http://192.168.0.94:7700/add
 
 #echo "Writing images to: $DATADIR until Ctrl+C is pressed ..."
 
