@@ -22,7 +22,7 @@ POSTURL=http://192.168.0.94:8000/add
 while [ true ]; do
 
   FILENAME=$DATADIR/webcam-`date +%s`.jpg.enc
-  
+
   fswebcam -r $PICSIZE --skip 2 --jpeg 80 - | \
     openssl smime \
         -encrypt \
@@ -36,4 +36,3 @@ while [ true ]; do
   #echo "File written: $FILENAME"
   sleep $INTERVAL
 done
-
