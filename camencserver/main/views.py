@@ -62,7 +62,11 @@ def add(request):
     diff = len(os.listdir(data_dir)) - MAX_FILES
     if diff > 0:
         # Delete `diff` oldest files.
-        li = [(x.path, int(x.stat().st_ctime)) for x in os.scandir(d) if x.path.endswith('.enc')]
+        li = [
+            (x.path, int(x.stat().st_ctime))
+            for x in os.scandir(data_dir)
+            if x.path.endswith('.enc')
+        ]
         li.sort(key=lambda x: x[1])
         li = li[:diff]  # only need the files with lowest timestamp vals
         for f, t in li:
