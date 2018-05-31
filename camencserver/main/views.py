@@ -42,6 +42,7 @@ def add(request):
     if not os.path.exists(data_dir):
         os.mkdir(data_dir, 0o755)
     if os.path.exists(os.path.join(data_dir, '.upload-disabled')):
+        print("Upload disabled.")
         return HttpResponseNotAllowed('Upload disabled.')
 
     file_name = '{}.jpg.enc'.format(int(datetime.timestamp(datetime.utcnow()) * 1000))
@@ -49,14 +50,6 @@ def add(request):
     with open(full_path, 'wb+') as fh:
         for chunk in upload.chunks():
             fh.write(chunk)
-
-    # Integrity check: verify file size if reasonable for an image.
-    file_size = os.path.getsize(full_path)  # Bytes
-    if file_size < 10 * KiB:
-        return HttpResponseBadRequest('File size too small for a camenc image.')
-    if file_size > 500 * KiB:
-        os.remove(full_path)  # delete large files.
-        return HttpResponseBadRequest('File size too large for a camenc image.')
 
     # Keep number of files below maximum.
     diff = len(os.listdir(data_dir)) - MAX_FILES
@@ -71,5 +64,16 @@ def add(request):
         li = li[:diff]  # only need the files with lowest timestamp vals
         for f, t in li:
             os.remove(f)
+
+    # Integrity check: verify file size if reasonable for an image.
+    file_size = os.path.getsize(full_path)  # Bytes
+    if file_size < 10 * KiB:
+        os.remove(full_path)  # delete faulty files.
+        print("File size too small for a camenc image: {} Bytes".format(file_size))
+        return HttpResponseBadRequest('File size too small for a camenc image.')
+    if file_size > 500 * KiB:
+        os.remove(full_path)  # delete faulty files.
+        print("File size too large for a camenc image: {} Bytes".format(file_size))
+        return HttpResponseBadRequest('File size too large for a camenc image.')
 
     return HttpResponse()
