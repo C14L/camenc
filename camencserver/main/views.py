@@ -18,9 +18,8 @@ if not os.path.exists(PICS_DIR):
     os.mkdir(PICS_DIR, 0o755)
 
 RE_VALID_UPLOAD_NAME = re.compile(r'^[a-z0-9]{6}-\d{10}\.jpg.enc$')
-
+RE_VALID_UPLOAD_DIR = re.compile(r'^[a-zA-Z0-9]{32}$')
 KiB = 1024
-
 MAX_FILES = 20000  # Max number of files kept in the pics dir. Oldest files are deleted.
 
 
@@ -31,11 +30,13 @@ def home(request):
 @csrf_exempt
 def add(request):
     upload = request.FILES['file']
-    uid = request.POST['uid']
+    uid = request.POST['uid'][:32]
 
     log.info('uid, upload.name: ', uid, upload.name)
 
-    # if not RE_VALID_UPLOAD_NAME.match(upload.name):
+    if not RE_VALID_UPLOAD_DIR.match(uid):
+        return HttpResponseBadRequest('Invalid upload data.')
+    #if not RE_VALID_UPLOAD_NAME.match(upload.name):
     #     return HttpResponseBadRequest('Invalid upload data.')
 
     data_dir = os.path.join(PICS_DIR, uid)
