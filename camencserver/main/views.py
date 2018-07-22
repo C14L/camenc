@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import time
 
 from datetime import datetime
 from random import randint
@@ -80,7 +81,7 @@ def add(request):
     upload = request.FILES['file']
     uid = request.POST['uid'][:32]
 
-    log.info('uid, upload.name: ', uid, upload.name)
+    log.info('uid, upload.name: %s %s', uid, upload.name)
 
     if not RE_VALID_UPLOAD_DIR.match(uid):
         return HttpResponseBadRequest('Invalid upload data.')
@@ -95,7 +96,7 @@ def add(request):
         return HttpResponseNotAllowed('Upload disabled.')
 
     file_name = '{}.jpg.enc'.format(
-        int(datetime.timestamp(datetime.utcnow()) * 1000)
+        int(time.time() * 1000)
     )
     full_path = os.path.join(data_dir, file_name)
     with open(full_path, 'wb+') as fh:
@@ -104,7 +105,7 @@ def add(request):
 
     # Randomly every 10th request check storage constrains.
     if randint(0, 9) == 5:
-        enforce_storage_constrains()
+        enforce_storage_constrains(data_dir, full_path)
 
     # Integrity check: verify file size if reasonable for an image.
     file_size = os.path.getsize(full_path)  # Bytes
@@ -117,11 +118,12 @@ def add(request):
     return HttpResponse()
 
 
-def enforce_storage_constrains():
+def enforce_storage_constrains(data_dir, full_path):
     # Keep total file storage size within "max_gb".
     pass
 
     # Keep only files equal or younger than "max_days".
+    pass
 
     # Keep number of files within "max_files".
     diff = len(os.listdir(data_dir)) - MAX_FILES
@@ -129,12 +131,12 @@ def enforce_storage_constrains():
         # Delete `diff` oldest files.
         li = [
             (x.path, int(x.stat().st_ctime))
-            for x in os.scandir(data_dir)
+            for x in os.path.scandir(data_dir)
             if x.path.endswith('.enc')
         ]
         li.sort(key=lambda x: x[1])
         li = li[:diff]  # only need the files with lowest timestamp vals
-        for f, t in li:
+        for f, _t in li:
             os.remove(f)
 
     # Integrity check: verify file size if reasonable for an image.
