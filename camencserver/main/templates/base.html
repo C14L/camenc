@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style>
+
+header { overflow: hidden; }
+header h1 { float: left; }
+header form { float: right; margin: 12px; }
+
+main fieldset {
+    display: flex;
+    flex-direction: row;
+}
+main fieldset form,
+main fieldset ul {
+
+}
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Camera settings</h1>
+      <form method="post" action="{% url 'user_logout' %}">
+        {% csrf_token %}
+        <input type="submit" value="Logout"/>
+        <input type="hidden" name="next" value="/"/>
+      </form>
+    </header>
+    <hr/>
+    <main>
+      {% block main %}{% endblock %}
+    </main>
+    <hr/>
+    <footer>
+      &copy; 2018
+    </footer>
+  </body>
+</html>

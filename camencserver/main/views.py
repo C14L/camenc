@@ -3,11 +3,18 @@ import os
 import re
 
 from datetime import datetime
+from random import randint
 
 from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed
+from django.http import HttpResponse, HttpResponseBadRequest, \
+    HttpResponseNotAllowed, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+
+from .models import Cam
+from .forms import CamForm
 
 
 log = logging.getLogger(__name__)
@@ -23,8 +30,49 @@ KiB = 1024
 MAX_FILES = 20000  # Max number of files kept in the pics dir. Oldest files are deleted.
 
 
-def home(request):
-    return HttpResponse('This is the endpoint for camenc security camera image storage.')
+@login_required
+def home(request, template='main/home.html'):
+    if request.method == 'POST':
+        if request.POST.get('pk'):
+            cam = Cam.objects.get(pk=request.POST['pk'])
+            form = CamForm(request.POST, instance=cam)
+            form.save()
+            messages.success(request, 'Cam aktualisiert.')
+        else:
+            form = CamForm(request.POST)
+            cam = form.save(commit=False)
+            cam.user = request.user
+            cam.save()
+            messages.success(request, 'Cam neu angelegt.')
+        return HttpResponseRedirect('/')
+
+    cams = [
+        {
+            'data': x,
+            'form': CamForm(instance=x),
+            'status': get_cam_status(x.uid),
+        }
+        for x in Cam.objects.filter(user=request.user)
+    ]
+
+    context = {
+        'cams': cams,
+        'new_cam_form': CamForm(),
+    }
+
+    return render(request, template, context)
+
+
+def get_cam_status(uid):
+    return {
+        'latest_post_date': datetime.now(),
+        'oldest_post_date': datetime.now(),
+        'files_count': 48396,
+        'storage_gb_used': 2.13,
+        'storage_gb_free': 0.87,
+        'health_percent': 100,
+        # ...
+    }
 
 
 @csrf_exempt
@@ -46,13 +94,36 @@ def add(request):
         print("Upload disabled.")
         return HttpResponseNotAllowed('Upload disabled.')
 
-    file_name = '{}.jpg.enc'.format(int(datetime.timestamp(datetime.utcnow()) * 1000))
+    file_name = '{}.jpg.enc'.format(
+        int(datetime.timestamp(datetime.utcnow()) * 1000)
+    )
     full_path = os.path.join(data_dir, file_name)
     with open(full_path, 'wb+') as fh:
         for chunk in upload.chunks():
             fh.write(chunk)
 
-    # Keep number of files below maximum.
+    # Randomly every 10th request check storage constrains.
+    if randint(0, 9) == 5:
+        enforce_storage_constrains()
+
+    # Integrity check: verify file size if reasonable for an image.
+    file_size = os.path.getsize(full_path)  # Bytes
+    if file_size < 10 * KiB:
+        return HttpResponseBadRequest('File size too small for a camenc image.')
+    if file_size > 500 * KiB:
+        os.remove(full_path)  # delete large files.
+        return HttpResponseBadRequest('File size too large for a camenc image.')
+
+    return HttpResponse()
+
+
+def enforce_storage_constrains():
+    # Keep total file storage size within "max_gb".
+    pass
+
+    # Keep only files equal or younger than "max_days".
+
+    # Keep number of files within "max_files".
     diff = len(os.listdir(data_dir)) - MAX_FILES
     if diff > 0:
         # Delete `diff` oldest files.
@@ -78,3 +149,4 @@ def add(request):
         return HttpResponseBadRequest('File size too large for a camenc image.')
 
     return HttpResponse()
+
