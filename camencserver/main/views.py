@@ -131,7 +131,7 @@ def enforce_storage_constrains(data_dir, full_path):
         # Delete `diff` oldest files.
         li = [
             (x.path, int(x.stat().st_ctime))
-            for x in os.path.scandir(data_dir)
+            for x in os.scandir(data_dir)
             if x.path.endswith('.enc')
         ]
         li.sort(key=lambda x: x[1])
