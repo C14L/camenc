@@ -2,11 +2,11 @@
 
 EXECDIR=/home/pi/dev/camenc
 DATADIR=/home/pi/temp/raspicam
-INTERVAL=1
+INTERVAL=2
 #PICSIZE=1920x1080
 PICSIZE=960x540
 CONFFILE=~/.camenc
-POSTURL=http://192.168.0.94:7700/add
+POSTURL="http://192.168.0.94:7700/add"
 
 #echo "Writing images to: $DATADIR until Ctrl+C is pressed ..."
 
@@ -33,6 +33,9 @@ while [ true ]; do
 
   curl -F "uid=$HASH" -F "file=@$FILENAME" $POSTURL
 
-  #echo "File written: $FILENAME"
   sleep $INTERVAL
+  
+  rm -f "$FILENAME"
+
 done
+
