@@ -1,6 +1,8 @@
 import os
 
-DEBUG = True
+ISDEV = bool(os.environ['ISDEV'])
+
+DEBUG = ISDEV
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -76,3 +78,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+# # # # #
+
+PICS_DIR = '/tmp/pics' if ISDEV else '/opt/camencpics'

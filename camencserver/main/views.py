@@ -20,8 +20,7 @@ from .forms import CamForm
 
 log = logging.getLogger(__name__)
 
-# PICS_DIR = os.path.join(settings.BASE_DIR, 'pics')
-PICS_DIR = '/tmp/pics'
+PICS_DIR = settings.PICS_DIR
 if not os.path.exists(PICS_DIR):
     os.mkdir(PICS_DIR, 0o755)
 
