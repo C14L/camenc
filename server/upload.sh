@@ -4,7 +4,7 @@
 SRC=$( cd "$( dirname "$0" )"; pwd )
 
 # The destination server and directory
-DST="cst@89.110.147.123:/opt/"
+DST="cst@89.110.147.123:/opt/camenc/"
 
 echo "${SRC} >>> ${DST}"
 read -rsp "Press [ENTER] to start..."

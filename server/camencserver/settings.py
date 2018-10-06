@@ -1,6 +1,6 @@
 import os
 
-ISDEV = bool(os.environ['ISDEV'])
+ISDEV = bool(os.environ.get('ISDEV'))
 
 DEBUG = ISDEV
 
@@ -8,7 +8,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = '438*qk@nur5+v_x#oa$cezqk49&worelm81rps+$g%x0-f%m@!'
 
-ALLOWED_HOSTS = ['192.168.0.94', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = [
+    '.c14l.com',
+    '192.168.0.94',
+    '127.0.0.1',
+    'localhost',
+]
 
 ROOT_URLCONF = 'camencserver.urls'
 
@@ -80,4 +85,5 @@ STATIC_URL = '/static/'
 
 # # # # #
 
-PICS_DIR = '/tmp/pics' if ISDEV else '/opt/camencpics'
+PICS_DIR = '/tmp/pics' if ISDEV else '/opt/camenc/pics'
+
