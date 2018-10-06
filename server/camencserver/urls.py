@@ -5,9 +5,9 @@ from django.urls import path
 import main.views
 
 urlpatterns = [
-    path('login/', login, name='user_login'),
-    path('logout/', logout, name='user_logout'),
-    path('admin/', admin.site.urls, name='admin'),
-    path('', main.views.home),
-    path('add', main.views.add),
+    path('camenc/login/', login, name='user_login'),
+    path('camenc/logout/', logout, name='user_logout'),
+    path('camenc/admin/', admin.site.urls, name='admin'),
+    path('camenc/', main.views.home),
+    path('camenc/add', main.views.add),
 ]

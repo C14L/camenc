@@ -2,4 +2,4 @@
 *.jpg
 *.enc
 */pics/*
-
+*/static_files/*

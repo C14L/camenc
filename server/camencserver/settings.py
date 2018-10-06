@@ -19,9 +19,9 @@ ROOT_URLCONF = 'camencserver.urls'
 
 WSGI_APPLICATION = 'camencserver.wsgi.application'
 
-LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = '/camenc/login/'
+LOGIN_REDIRECT_URL = '/camenc/'
+LOGOUT_REDIRECT_URL = '/camenc/'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -82,6 +82,8 @@ USE_L10N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_files')
 
 # # # # #
 
