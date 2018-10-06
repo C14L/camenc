@@ -9,9 +9,9 @@ DST="cst@89.110.147.123:/opt/"
 echo "${SRC} >>> ${DST}"
 read -rsp "Press [ENTER] to start..."
 
-find ${SRC} -type d -print0 | xargs -0 chmod 755
-find ${SRC} -type f -print0 | xargs -0 chmod 644
-chmod -R 755 ${SRC}/*.sh
+#find ${SRC} -type d -print0 | xargs -0 chmod 755
+#find ${SRC} -type f -print0 | xargs -0 chmod 644
+#chmod -R 755 ${SRC}/*.sh
 
 rsync -rtvP \
     --delete \
