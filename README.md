@@ -6,6 +6,11 @@ Create a new key pair. Better use rsa:4096 I guess.
     $ openssl req -x509 -nodes -newkey rsa:2048 \
         -keyout private-key.pem -out public-key.pem
 
+The private key is not encrypted, so it can be easily used
+by scripts. To store it, encrypt it manually.
+
+    $ gpg --cipher-algo=AES256 -c private-key.pem
+
 Encrypt an image file using the Public Key.
 
     $ openssl smime -encrypt -binary -aes-256-cbc \
