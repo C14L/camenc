@@ -1,4 +1,4 @@
-#*.pem
+private-key*.pem
 *.jpg
 *.enc
 */pics/*
