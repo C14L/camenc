@@ -1,0 +1,5 @@
+cat /space01/camencpics/abc.jpg.enc | \
+openssl smime -decrypt -binary -inform DEM -inkey private-key-b.pem | \
+openssl smime -decrypt -binary -inform DEM -inkey private-key-a.pem | \
+display
+
