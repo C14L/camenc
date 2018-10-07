@@ -6,7 +6,8 @@ INTERVAL=2
 #PICSIZE=1920x1080
 PICSIZE=960x540
 CONFFILE=~/.camenc
-POSTURL="http://192.168.0.94:7700/add"
+#POSTURL="http://192.168.0.94:7700/add"
+POSTURL="https://c14l.com/camenc/add"
 
 #echo "Writing images to: $DATADIR until Ctrl+C is pressed ..."
 
@@ -28,8 +29,13 @@ while [ true ]; do
         -encrypt \
         -binary \
         -aes-256-cbc \
-        -outform DER $EXECDIR/public-key.pem | \
-      tee $FILENAME >/dev/null 2>$DATADIR/error.log
+        -outform DER "$EXECDIR/public-key-a.pem" | \
+    openssl smime \
+        -encrypt \
+        -binary \
+        -aes-256-cbc \
+        -outform DER "$EXECDIR/public-key-b.pem" | \
+    tee $FILENAME >/dev/null 2>$DATADIR/error.log
 
   curl -F "uid=$HASH" -F "file=@$FILENAME" $POSTURL
 
