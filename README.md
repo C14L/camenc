@@ -1,7 +1,7 @@
 USAGE OF OPENSSL
 ================
 
-Create a new key pair.
+Create a new key pair. Better use rsa:4096 I guess.
 
     $ openssl req -x509 -nodes -newkey rsa:2048 \
         -keyout private-key.pem -out public-key.pem
