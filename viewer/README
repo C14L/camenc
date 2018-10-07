@@ -3,3 +3,10 @@ openssl smime -decrypt -binary -inform DEM -inkey private-key-b.pem | \
 openssl smime -decrypt -binary -inform DEM -inkey private-key-a.pem | \
 display
 
+Convert to thumbnail by piping picture through ImageMagick's `convert`:
+
+    $ cat /space01/camencpics/1eedc08de01230d3b0a9b3225a5edbb8/1538937971249.jpg.enc
+| openssl smime -decrypt -binary -inform DEM -inkey private-key-b.pem | openssl
+smime -decrypt -binary -inform DEM -inkey private-key-a.pem | convert - -resize
+64x-1 - | display
+
