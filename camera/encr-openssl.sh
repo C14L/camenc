@@ -1,6 +1,6 @@
 #!/bin/bash
 
-EXECDIR=/home/pi/dev/camenc
+EXECDIR=/home/pi/dev/camenc/camera
 DATADIR=/home/pi/temp/raspicam
 INTERVAL=2
 #PICSIZE=1920x1080
