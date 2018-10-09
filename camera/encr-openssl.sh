@@ -2,9 +2,9 @@
 
 EXECDIR=/home/pi/dev/camenc/camera
 DATADIR=/home/pi/temp/raspicam
-INTERVAL=2
-#PICSIZE=1920x1080
-PICSIZE=960x540
+INTERVAL=3
+PICSIZE=1920x1080
+#PICSIZE=960x540
 CONFFILE=~/.camenc
 #POSTURL="http://192.168.0.94:7700/add"
 POSTURL="https://c14l.com/camenc/add"
