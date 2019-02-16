@@ -68,7 +68,7 @@ def motion_callback(pin):
     cnt = len(last_motions)
 
     if cnt >= MOTION_COUNT_THRESHOLD:
-        s = "Moved detected: %d in the past %d seconds."
+        s = "Movement detected: %d in the past %d seconds."
         log.warning(s, cnt, MOTION_COUNT_TIMESPAN)
 
 # Callback for switch signal.
