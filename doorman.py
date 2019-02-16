@@ -11,7 +11,8 @@ handler = logging.FileHandler(log_fname)
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 handler.setFormatter(formatter)
 log.addHandler(handler) 
-log.setLevel(logging.INFO)
+
+log.setLevel(logging.WARNING)
 
 # GPIO-Port to connect one side on the switch: GPIO 5 (Pin 29)
 # The other side of the switch is connected to any ground (GND)
