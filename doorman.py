@@ -26,7 +26,12 @@ GPIO_PIR = 4
 # State threshold. A state has to be stable for this many seconds
 # before the new state is counted. If it flips back to the previous
 # state within this threshold, the state flip is ignored.
-THRESHOLD = 0.5
+SWITCH_TIME_THRESHOLD = 0.5
+
+# The motion sensor only reports if within this time span it 
+# activated at least this many times.
+MOTION_COUNT_TIMESPAN = 20  # seconds
+MOTION_COUNT_THRESHOLD = 2
 
 # Init GPIO, BMC-Pin number, and Pullup-Resistor
 GPIO.setwarnings(False)
@@ -39,6 +44,7 @@ log.info("Initializing motion detector")
 while GPIO.input(GPIO_PIR) != 0:
     time.sleep(0.1)
 log.info("Motion detector ready")
+last_motions = []
 
 # Initialize switch state and time.
 switch_time = time.time()
@@ -47,7 +53,14 @@ log.info("Door is initially %s." % door_state)
 
 # Callback for motion detector signal.
 def motion_callback(pin):
-    log.warning("Something moved!")
+    global last_motions
+    now = int(time.time())
+    min_time = now - MOTION_COUNT_TIMESPAN
+    last_motions = [x for x in last_motions if x > min_time]
+    last_motions.append(now)
+
+    if len(last_motions) >= MOTION_COUNT_THRESHOLD:
+        log.warning("Something moved!")
 
 # Callback for switch signal.
 def switch_callback(pin):
