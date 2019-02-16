@@ -50,18 +50,26 @@ last_motions = []
 # Initialize switch state and time.
 switch_time = time.time()
 door_state = 'OPEN' if GPIO.input(GPIO_SWITCH) else 'CLOSE'
-log.info("Door is initially %s." % door_state)
+
+log.warning("Doorman starts to watch the door...")
+log.warning("Door is %s." % door_state)
 
 # Callback for motion detector signal.
 def motion_callback(pin):
     global last_motions
+
+    signal = GPIO.input(pin)
+    log.info('PIR signal: %s', signal)
+
     now = int(time.time())
     min_time = now - MOTION_COUNT_TIMESPAN
     last_motions = [x for x in last_motions if x > min_time]
     last_motions.append(now)
+    cnt = len(last_motions)
 
-    if len(last_motions) >= MOTION_COUNT_THRESHOLD:
-        log.warning("Something moved!")
+    if cnt >= MOTION_COUNT_THRESHOLD:
+        s = "Moved detected: %d in the past %d seconds."
+        log.warning(s, cnt, MOTION_COUNT_TIMESPAN)
 
 # Callback for switch signal.
 def switch_callback(pin):
@@ -90,6 +98,6 @@ try:
         time.sleep(100)
 
 except KeyboardInterrupt:
-    log.info("Shutting down")
+    log.warning("Doorman shutting down!")
     GPIO.cleanup()
 
