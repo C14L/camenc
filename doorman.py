@@ -1,12 +1,13 @@
 #!/usr/bin/python3
 
 import RPi.GPIO as GPIO
-import datetime
+import datetime.datetime as dt
 import logging
 import time
 
-log = logging.getLogger('raspi_doorman')
-handler = logging.FileHandler('/tmp/raspi_doorman.log')
+log_fname = '/tmp/doorman.%s.log' % dt.strftime(dt.now(), '%Y%m%dT%H%M%S')
+log = logging.getLogger('doorman')
+handler = logging.FileHandler(log_filename)
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 handler.setFormatter(formatter)
 log.addHandler(handler) 
