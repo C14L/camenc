@@ -10,7 +10,7 @@ SECRET_KEY = '438*qk@nur5+v_x#oa$cezqk49&worelm81rps+$g%x0-f%m@!'
 
 ALLOWED_HOSTS = [
     '.c14l.com',
-    '192.168.0.94',
+    '192.168.0.136',
     '127.0.0.1',
     'localhost',
 ]
@@ -87,5 +87,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static_files')
 
 # # # # #
 
-PICS_DIR = '/tmp/pics' if ISDEV else '/opt/camenc/pics'
+PICS_DIR = '/tmp/pics' if ISDEV else '/var/camenc/pics'
+
+DOORMAN_LOGFILE = '/tmp/doorman.log' if ISDEV else '/var/camenc/doorman.log'
 

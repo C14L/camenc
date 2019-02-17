@@ -30,6 +30,12 @@ KiB = 1024
 MAX_FILES = 20000  # Max number of files kept in the pics dir. Oldest files are deleted.
 
 
+DOORMAN_LOGFILE = settings.DOORMAN_LOGFILE
+DOORMAN_DIR = DOORMAN_LOGFILE.rsplit('/', 1)[0]
+if not os.path.exists(DOORMAN_DIR):
+    os.mkdir(DOORMAN_DIR, 0o755)
+
+
 @login_required
 def home(request, template='main/home.html'):
     if request.method == 'POST':
@@ -55,9 +61,13 @@ def home(request, template='main/home.html'):
         for x in Cam.objects.filter(user=request.user)
     ]
 
+    doorman = get_doorman_log()
+    print("doorman len -> %d" % len(doorman))
+
     context = {
         'cams': cams,
         'new_cam_form': CamForm(),
+        'doorman': doorman,
     }
 
     return render(request, template, context)
@@ -73,6 +83,18 @@ def get_cam_status(uid):
         'health_percent': 100,
         # ...
     }
+
+
+@csrf_exempt
+def doorman_add(request):
+    """Receive status from doorman (door opening, movement detection).
+    """
+    data = request.POST['data']
+    now = datetime.now()
+    s = datetime.strftime(now, '%Y-%m-%dT%H:%M:%S')
+    with open(DOORMAN_LOGFILE, 'a') as fh:
+        fh.write('%s %s\n' % (s, data))
+    return HttpResponse()
 
 
 @csrf_exempt
@@ -150,4 +172,13 @@ def enforce_storage_constrains(data_dir, full_path):
         return HttpResponseBadRequest('File size too large for a camenc image.')
 
     return HttpResponse()
+
+
+def get_doorman_log(head=None, tail=None):
+    with open(DOORMAN_LOGFILE, 'r') as fh:
+        if head:
+            return list(fh.readlines())[:head]
+        elif tail:
+            return list(fh.readlines())[tail:]
+        return list(fh.readlines())
 
