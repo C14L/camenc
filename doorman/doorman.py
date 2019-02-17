@@ -6,7 +6,8 @@ import logging
 import requests
 import time
 
-url = 'http://192.168.0.136:8000/doorman/add'
+#url = 'http://192.168.0.136:8000/doorman/add'
+url = 'https://c14l.com/doorman/add'
 
 log_fname = '/tmp/doorman.%s.log' % dt.strftime(dt.now(), '%Y%m%dT%H%M%S')
 log = logging.getLogger('doorman')
