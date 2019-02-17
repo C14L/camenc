@@ -3,7 +3,10 @@
 import RPi.GPIO as GPIO
 from datetime import datetime as dt
 import logging
+import requests
 import time
+
+url = 'http://192.168.0.136:8000/doorman/add'
 
 log_fname = '/tmp/doorman.%s.log' % dt.strftime(dt.now(), '%Y%m%dT%H%M%S')
 log = logging.getLogger('doorman')
@@ -55,6 +58,8 @@ door_state = 'OPEN' if GPIO.input(GPIO_SWITCH) else 'CLOSE'
 log.warning("Doorman starts to watch the door...")
 log.warning("Door is %s." % door_state)
 
+requests.post(url, {'data': 'Startup: initial door state %s' % door_state})
+
 # Callback for motion detector signal.
 def motion_callback(pin):
     global last_motions
@@ -70,7 +75,9 @@ def motion_callback(pin):
 
     if cnt >= MOTION_COUNT_THRESHOLD:
         s = "Movement detected: %d in the past %d seconds."
-        log.warning(s, cnt, MOTION_COUNT_TIMESPAN)
+        s = s % (cnt, MOTION_COUNT_TIMESPAN)
+        log.warning(s)
+        requests.post(url, {'data': s})
 
 # Callback for switch signal.
 def switch_callback(pin):
@@ -82,13 +89,17 @@ def switch_callback(pin):
             door_state = 'OPEN'
             elapsed = time.time() - switch_time
             switch_time = time.time()
-            log.warning('Door OPENED after %.2f seconds.', elapsed)
+            s = 'Door OPENED after %.2f seconds.' % (elapsed,)
+            log.warning(s)
+            requests.post(url, {'data': s})
     else:
         if door_state == 'OPEN':
             door_state = 'CLOSE'
             elapsed = time.time() - switch_time
             switch_time = time.time()
-            log.warning('Door CLOSED after %.2f seconds.', elapsed)
+            s = 'Door CLOSED after %.2f seconds.' % (elapsed,)
+            log.warning(s)
+            requests.post(url, {'data': s})
 
 # Interrupt for switch change signal
 GPIO.add_event_detect(GPIO_SWITCH, GPIO.BOTH, callback=switch_callback)
@@ -100,5 +111,6 @@ try:
 
 except KeyboardInterrupt:
     log.warning("Doorman shutting down!")
+    requests.post(url, {'data': 'Doorman shutting down!'})
     GPIO.cleanup()
 
