@@ -14,7 +14,7 @@ log = logging.getLogger('doorman')
 handler = logging.FileHandler(log_fname)
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 handler.setFormatter(formatter)
-log.addHandler(handler) 
+log.addHandler(handler)
 
 log.setLevel(logging.WARNING)
 
@@ -34,7 +34,7 @@ GPIO_PIR = 4
 # state within this threshold, the state flip is ignored.
 SWITCH_TIME_THRESHOLD = 0.5
 
-# The motion sensor only reports if within this time span it 
+# The motion sensor only reports if within this time span it
 # activated at least this many times.
 MOTION_COUNT_TIMESPAN = 20  # seconds
 MOTION_COUNT_THRESHOLD = 2
@@ -45,21 +45,40 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(GPIO_SWITCH, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(GPIO_PIR, GPIO.IN)
 
-# Initialize PIR, it has to be 0.
-log.info("Initializing motion detector")
-while GPIO.input(GPIO_PIR) != 0:
-    time.sleep(0.1)
-log.info("Motion detector ready")
+# Globals
 last_motions = []
+switch_time = None
+door_state = None
 
-# Initialize switch state and time.
-switch_time = time.time()
-door_state = 'OPEN' if GPIO.input(GPIO_SWITCH) else 'CLOSE'
 
-log.warning("Doorman starts to watch the door...")
-log.warning("Door is %s." % door_state)
+def post(data):
+    try:
+        requests.post(url, {'data': data})
+    except requests.exceptions.ConnectionError:
+        _log.error('Data POST failed, with data: "%s"', data)
 
-requests.post(url, {'data': 'Startup: initial door state %s' % door_state})
+
+def init_motion_detector():
+    # Initialize PIR, it has to be 0.
+    log.info("Initializing motion detector")
+    while GPIO.input(GPIO_PIR) != 0:
+        time.sleep(0.1)
+    log.info("Motion detector ready")
+
+
+def init_door_switch():
+    # Initialize switch state and time.
+    global switch_time
+    global door_state
+
+    switch_time = time.time()
+    door_state = 'OPEN' if GPIO.input(GPIO_SWITCH) else 'CLOSE'
+
+    log.warning("Doorman starts to watch the door...")
+    log.warning("Door is %s." % door_state)
+
+    post('Startup: initial door state %s' % door_state)
+
 
 # Callback for motion detector signal.
 def motion_callback(pin):
@@ -78,7 +97,8 @@ def motion_callback(pin):
         s = "Movement detected: %d in the past %d seconds."
         s = s % (cnt, MOTION_COUNT_TIMESPAN)
         log.warning(s)
-        requests.post(url, {'data': s})
+        post(s)
+
 
 # Callback for switch signal.
 def switch_callback(pin):
@@ -92,7 +112,7 @@ def switch_callback(pin):
             switch_time = time.time()
             s = 'Door OPENED after %.2f seconds.' % (elapsed,)
             log.warning(s)
-            requests.post(url, {'data': s})
+            post(s)
     else:
         if door_state == 'OPEN':
             door_state = 'CLOSE'
@@ -100,18 +120,25 @@ def switch_callback(pin):
             switch_time = time.time()
             s = 'Door CLOSED after %.2f seconds.' % (elapsed,)
             log.warning(s)
-            requests.post(url, {'data': s})
+            post(s)
 
-# Interrupt for switch change signal
-GPIO.add_event_detect(GPIO_SWITCH, GPIO.BOTH, callback=switch_callback)
-GPIO.add_event_detect(GPIO_PIR, GPIO.RISING, callback=motion_callback)
 
-try:
-    while True:
-        time.sleep(100)
+def run():
+    init_motion_detector()
+    init_door_switch()
 
-except KeyboardInterrupt:
-    log.warning("Doorman shutting down!")
-    requests.post(url, {'data': 'Doorman shutting down!'})
-    GPIO.cleanup()
+    # Set callbacks for signal changes
+    GPIO.add_event_detect(GPIO_SWITCH, GPIO.BOTH, callback=switch_callback)
+    GPIO.add_event_detect(GPIO_PIR, GPIO.RISING, callback=motion_callback)
 
+    try:
+        while True:
+            time.sleep(100)
+    except KeyboardInterrupt:
+        log.warning("Doorman shutting down!")
+        post('Doorman shutting down!')
+        GPIO.cleanup()
+
+
+if __name__ == "__main__":
+    run()
