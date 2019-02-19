@@ -87,7 +87,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static_files')
 
 # # # # #
 
-PICS_DIR = '/tmp/pics' if ISDEV else '/var/camenc/pics'
+PICS_DIR = '/tmp/pics' if ISDEV else '/opt/camenc/pics'
 
-DOORMAN_LOGFILE = '/tmp/doorman.log' if ISDEV else '/var/camenc/doorman.log'
+DOORMAN_LOGFILE = '/tmp/doorman.log' if ISDEV else '/opt/camenc/doorman.log'
 
