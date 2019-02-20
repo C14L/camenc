@@ -55,7 +55,7 @@ def post(data):
     try:
         requests.post(url, {'data': data})
     except requests.exceptions.ConnectionError:
-        _log.error('Data POST failed, with data: "%s"', data)
+        log.error('Data POST failed, with data: "%s"', data)
 
 
 def init_motion_detector():
