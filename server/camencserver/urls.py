@@ -9,7 +9,7 @@ urlpatterns = [
     path('camenc/login/', LoginView.as_view(), name='user_login'),
     path('camenc/logout/', LogoutView.as_view(), name='user_logout'),
     path('camenc/admin/', admin.site.urls, name='admin'),
-    path('camenc/', main.views.home),
+    path('camenc/doorman/add', main.views.doorman_add),
     path('camenc/add', main.views.add),
-    path('doorman/add', main.views.doorman_add),
+    path('camenc/', main.views.home),
 ]
