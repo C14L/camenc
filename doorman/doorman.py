@@ -6,12 +6,12 @@ import logging
 import requests
 import time
 
-#url = 'http://192.168.0.136:8000/doorman/add'
-url = 'https://c14l.com/doorman/add'
+#url = 'http://192.168.0.136:8000/camenc/doorman/add'
+url = 'https://c14l.com/camenc/doorman/add'
 
-log_fname = '/tmp/doorman.%s.log' % dt.strftime(dt.now(), '%Y%m%dT%H%M%S')
+log_fname = '/tmp/doorman.log'
 log = logging.getLogger('doorman')
-handler = logging.FileHandler(log_fname)
+handler = logging.FileHandler(log_fname, mode='a')
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 handler.setFormatter(formatter)
 log.addHandler(handler)
@@ -53,9 +53,11 @@ door_state = None
 
 def post(data):
     try:
-        requests.post(url, {'data': data})
+        requests.post(url, {'data': data}).raise_for_status()
+    except requests.exceptions.HTTPError:
+        log.warning('Data POST failed: HTTPError.')
     except requests.exceptions.ConnectionError:
-        log.error('Data POST failed, with data: "%s"', data)
+        log.warning('Data POST failed, with data: "%s"', data)
 
 
 def init_motion_detector():
