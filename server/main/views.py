@@ -31,9 +31,9 @@ MAX_FILES = 20000  # Max number of files kept in the pics dir. Oldest files are 
 
 
 DOORMAN_LOGFILE = settings.DOORMAN_LOGFILE
-DOORMAN_DIR = DOORMAN_LOGFILE.rsplit('/', 1)[0]
-if not os.path.exists(DOORMAN_DIR):
-    os.mkdir(DOORMAN_DIR, 0o755)
+# DOORMAN_DIR = DOORMAN_LOGFILE.rsplit('/', 1)[0]
+# if not os.path.exists(DOORMAN_DIR):
+#     os.mkdir(DOORMAN_DIR, 0o755)
 
 
 @login_required
@@ -175,10 +175,12 @@ def enforce_storage_constrains(data_dir, full_path):
 
 
 def get_doorman_log(head=None, tail=None):
-    with open(DOORMAN_LOGFILE, 'r') as fh:
-        if head:
-            return list(fh.readlines())[:head]
-        elif tail:
-            return list(fh.readlines())[tail:]
-        return list(fh.readlines())
-
+    try:
+        with open(DOORMAN_LOGFILE, 'r') as fh:
+            if head:
+                return list(fh.readlines())[:head]
+            elif tail:
+                return list(fh.readlines())[tail:]
+            return list(fh.readlines())
+    except FileNotFoundError:
+        return []
