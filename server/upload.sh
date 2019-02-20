@@ -17,6 +17,7 @@ rsync -rtvP \
     --delete \
     --exclude=__pycache__ \
     --exclude=*.swp \
+    --exclude=db.sqlite3 \
     ${SRC} \
     ${DST}
 
