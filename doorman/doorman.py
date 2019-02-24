@@ -174,7 +174,9 @@ def run():
 
     try:
         while True:
-            time.sleep(100)
+            time.sleep(10)
+            post('Ping!')
+
     except KeyboardInterrupt:
         log.warning("Doorman shutting down!")
         post('Doorman shutting down!')
