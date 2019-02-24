@@ -62,7 +62,7 @@ def home(request, template='main/home.html'):
     ]
 
     doorman = get_doorman_log()
-    print("doorman len -> %d" % len(doorman))
+    doorman.reverse()
 
     context = {
         'cams': cams,
