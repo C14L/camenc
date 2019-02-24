@@ -29,6 +29,12 @@ GPIO_SWITCH = 5
 # Ground (GND, Pin 6).
 GPIO_PIR = 4
 
+# GPIO-Port to connect the DO connector of the light detector.
+# This is GPIO 17 (Pin 11) on the Raspi. The light detector's
+# top pin (VCC) takes a 3.3V or 5V current, and its middle pin
+# is the ground (GND) connector.
+GPIO_LIGHT = 17
+
 # State threshold. A state has to be stable for this many seconds
 # before the new state is counted. If it flips back to the previous
 # state within this threshold, the state flip is ignored.
@@ -43,12 +49,18 @@ MOTION_COUNT_THRESHOLD = 2
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(GPIO_SWITCH, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+log.info('Door switch initialized.')
+GPIO.setup(GPIO_LIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+log.info('Light detector initialized.')
 GPIO.setup(GPIO_PIR, GPIO.IN)
+log.info('Motion detector initialized.')
 
 # Globals
 last_motions = []
 switch_time = None
 door_state = None
+light_time = None
+light_state = None
 
 
 def post(data):
@@ -66,6 +78,18 @@ def init_motion_detector():
     while GPIO.input(GPIO_PIR) != 0:
         time.sleep(0.1)
     log.info("Motion detector ready")
+
+
+def init_light_detector():
+    global light_time
+    global light_state
+
+    light_time = time.time()
+    light_state = 'OFF' if GPIO.input(GPIO_LIGHT) else 'ON'  # 1=OFF, 0=ON
+    log.warning("Doorman starts to watch the light...")
+    log.warning("Light is %s." % light_state)
+
+    post('Startup: initial light state %s' % light_state)
 
 
 def init_door_switch():
@@ -125,13 +149,28 @@ def switch_callback(pin):
             post(s)
 
 
+def light_callback(pin):
+    global light_state
+
+    new_light_state = 'OFF' if GPIO.input(pin) else 'ON'
+
+    if new_light_state != light_state:
+        light_state = new_light_state
+
+        s = 'Light is now %s' % light_state
+        log.warning(s)
+        post(s)
+
+
 def run():
     init_motion_detector()
     init_door_switch()
+    init_light_detector()
 
     # Set callbacks for signal changes
     GPIO.add_event_detect(GPIO_SWITCH, GPIO.BOTH, callback=switch_callback)
     GPIO.add_event_detect(GPIO_PIR, GPIO.RISING, callback=motion_callback)
+    GPIO.add_event_detect(GPIO_LIGHT, GPIO.BOTH, callback=light_callback)
 
     try:
         while True:
