@@ -89,11 +89,13 @@ def get_cam_status(uid):
 def doorman_add(request):
     """Receive status from doorman (door opening, movement detection).
     """
-    data = request.POST['data']
-    now = datetime.now()
-    s = datetime.strftime(now, '%Y-%m-%dT%H:%M:%S')
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    kind = request.POST.get('kind', None)
+    data = request.POST.get('data', None)
+    if kind is None or data is None:
+        return HttpResponseBadRequest()
     with open(DOORMAN_LOGFILE, 'a') as fh:
-        fh.write('%s %s\n' % (s, data))
+        fh.write('%s %s %s\n' % (now, kind, data))
     return HttpResponse()
 
 
