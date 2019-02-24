@@ -6,6 +6,12 @@ import logging
 import requests
 import time
 
+KIND_DOOR = 'door'
+KIND_LIGHT = 'light'
+KIND_MOVEMENT = 'movement'
+KIND_SYSTEM = 'system'
+KIND_PING = 'ping'
+
 #url = 'http://192.168.0.136:8000/camenc/doorman/add'
 url = 'https://c14l.com/camenc/doorman/add'
 
@@ -63,13 +69,19 @@ light_time = None
 light_state = None
 
 
-def post(data):
+def post(kind, data=''):
+    """Post a log message to the remote server.
+
+    Args:
+        kind (str): The kind of data ('door', 'movement', 'light', etc.)
+        data (str): The log message.
+    """
     try:
-        requests.post(url, {'data': data}).raise_for_status()
+        requests.post(url, {'kind': kind, 'data': data}).raise_for_status()
     except requests.exceptions.HTTPError:
-        log.warning('Data POST failed: HTTPError.')
+        log.warning('Data POST failed: HTTP error - %s: %s', (kind, data))
     except requests.exceptions.ConnectionError:
-        log.warning('Data POST failed, with data: "%s"', data)
+        log.warning('Data POST failed: Connection error - %s: %s', (kind, data))
 
 
 def init_motion_detector():
@@ -89,7 +101,7 @@ def init_light_detector():
     log.warning("Doorman starts to watch the light...")
     log.warning("Light is %s." % light_state)
 
-    post('Startup: initial light state %s' % light_state)
+    post(KIND_LIGHT, 'Startup: initial light state %s' % light_state)
 
 
 def init_door_switch():
@@ -103,7 +115,7 @@ def init_door_switch():
     log.warning("Doorman starts to watch the door...")
     log.warning("Door is %s." % door_state)
 
-    post('Startup: initial door state %s' % door_state)
+    post(KIND_DOOR, 'Startup: initial door state %s' % door_state)
 
 
 # Callback for motion detector signal.
@@ -123,7 +135,7 @@ def motion_callback(pin):
         s = "Movement detected: %d in the past %d seconds."
         s = s % (cnt, MOTION_COUNT_TIMESPAN)
         log.warning(s)
-        post(s)
+        post(KIND_MOVEMENT, s)
 
 
 # Callback for switch signal.
@@ -138,7 +150,7 @@ def switch_callback(pin):
             switch_time = time.time()
             s = 'Door OPENED after %.2f seconds.' % (elapsed,)
             log.warning(s)
-            post(s)
+            post(KIND_DOOR, s)
     else:
         if door_state == 'OPEN':
             door_state = 'CLOSE'
@@ -146,7 +158,7 @@ def switch_callback(pin):
             switch_time = time.time()
             s = 'Door CLOSED after %.2f seconds.' % (elapsed,)
             log.warning(s)
-            post(s)
+            post(KIND_DOOR, s)
 
 
 def light_callback(pin):
@@ -159,7 +171,7 @@ def light_callback(pin):
 
         s = 'Light is now %s' % light_state
         log.warning(s)
-        post(s)
+        post(KIND_LIGHT, s)
 
 
 def run():
@@ -175,11 +187,11 @@ def run():
     try:
         while True:
             time.sleep(10)
-            post('Ping!')
+            post(KIND_PING)
 
     except KeyboardInterrupt:
         log.warning("Doorman shutting down!")
-        post('Doorman shutting down!')
+        post(KIND_SYSTEM, 'Doorman shutting down!')
         GPIO.cleanup()
 
 
