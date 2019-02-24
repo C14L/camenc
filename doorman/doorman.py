@@ -86,10 +86,10 @@ def post(kind, data=''):
 
 def init_motion_detector():
     # Initialize PIR, it has to be 0.
-    log.info("Initializing motion detector")
     while GPIO.input(GPIO_PIR) != 0:
         time.sleep(0.1)
     log.info("Motion detector ready")
+    post(KIND_SYSTEM, 'initial movement is 0')
 
 
 def init_light_detector():
@@ -101,7 +101,7 @@ def init_light_detector():
     log.warning("Doorman starts to watch the light...")
     log.warning("Light is %s." % light_state)
 
-    post(KIND_LIGHT, 'Startup: initial light state %s' % light_state)
+    post(KIND_SYSTEM, 'initial light %s' % light_state)
 
 
 def init_door_switch():
@@ -115,7 +115,7 @@ def init_door_switch():
     log.warning("Doorman starts to watch the door...")
     log.warning("Door is %s." % door_state)
 
-    post(KIND_DOOR, 'Startup: initial door state %s' % door_state)
+    post(KIND_SYSTEM, 'initial door %s' % door_state)
 
 
 # Callback for motion detector signal.
@@ -132,9 +132,9 @@ def motion_callback(pin):
     cnt = len(last_motions)
 
     if cnt >= MOTION_COUNT_THRESHOLD:
-        s = "Movement detected: %d in the past %d seconds."
+        s = "%d in %d secs"
         s = s % (cnt, MOTION_COUNT_TIMESPAN)
-        log.warning(s)
+        log.warning('Movement detected: %s', s)
         post(KIND_MOVEMENT, s)
 
 
@@ -143,22 +143,16 @@ def switch_callback(pin):
     global switch_time
     global door_state
 
-    if GPIO.input(pin):
-        if door_state == 'CLOSE':
-            door_state = 'OPEN'
-            elapsed = time.time() - switch_time
-            switch_time = time.time()
-            s = 'Door OPENED after %.2f seconds.' % (elapsed,)
-            log.warning(s)
-            post(KIND_DOOR, s)
-    else:
-        if door_state == 'OPEN':
-            door_state = 'CLOSE'
-            elapsed = time.time() - switch_time
-            switch_time = time.time()
-            s = 'Door CLOSED after %.2f seconds.' % (elapsed,)
-            log.warning(s)
-            post(KIND_DOOR, s)
+    new_door_state = 'OPEN' if GPIO.input(pin) else 'CLOSE'
+
+    if new_door_state != door_state:
+        door_state = new_door_state
+        elapsed = time.time() - switch_time
+        switch_time = time.time()
+
+        s = '%s after %.2f secs' % (door_state, elapsed)
+        log.warning('Door is now %s', s)
+        post(KIND_DOOR, s)
 
 
 def light_callback(pin):
@@ -169,12 +163,13 @@ def light_callback(pin):
     if new_light_state != light_state:
         light_state = new_light_state
 
-        s = 'Light is now %s' % light_state
-        log.warning(s)
-        post(KIND_LIGHT, s)
+        log.warning('Light is now %s', light_state)
+        post(KIND_LIGHT, light_state)
 
 
 def run():
+    post(KIND_SYSTEM, 'starting up')
+
     init_motion_detector()
     init_door_switch()
     init_light_detector()
@@ -191,7 +186,7 @@ def run():
 
     except KeyboardInterrupt:
         log.warning("Doorman shutting down!")
-        post(KIND_SYSTEM, 'Doorman shutting down!')
+        post(KIND_SYSTEM, 'shutting down')
         GPIO.cleanup()
 
 
