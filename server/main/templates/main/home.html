@@ -17,11 +17,12 @@
   <legend>{{ cam.data.uid }}</legend>
   <ul>
   {% for x in doorman %}
-      <li>{{x}}</li>
+    <li>{{x}}</li>
   {% endfor %}
   </ul>
 </fieldset>
 
+{#
 {% for cam in cams %}
 <fieldset>
   <legend>{{ cam.data.uid }}</legend>
@@ -50,5 +51,6 @@
     <button type="submit">speichern</button>
   </form>
 </fieldset>
+#}
 
 {% endblock %}
