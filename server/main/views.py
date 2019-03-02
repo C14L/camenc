@@ -24,16 +24,13 @@ PICS_DIR = settings.PICS_DIR
 if not os.path.exists(PICS_DIR):
     os.mkdir(PICS_DIR, 0o755)
 
+DOORMAN_LOGFILE = settings.DOORMAN_LOGFILE
+DOORMAN_PING_LOGFILE = settings.DOORMAN_PING_LOGFILE
+
 RE_VALID_UPLOAD_NAME = re.compile(r'^[a-z0-9]{6}-\d{10}\.jpg.enc$')
 RE_VALID_UPLOAD_DIR = re.compile(r'^[a-zA-Z0-9]{32}$')
 KiB = 1024
 MAX_FILES = 20000  # Max number of files kept in the pics dir. Oldest files are deleted.
-
-
-DOORMAN_LOGFILE = settings.DOORMAN_LOGFILE
-# DOORMAN_DIR = DOORMAN_LOGFILE.rsplit('/', 1)[0]
-# if not os.path.exists(DOORMAN_DIR):
-#     os.mkdir(DOORMAN_DIR, 0o755)
 
 
 @login_required
@@ -87,15 +84,22 @@ def get_cam_status(uid):
 
 @csrf_exempt
 def doorman_add(request):
-    """Receive status from doorman (door opening, movement detection).
+    """Receive status from doorman (door opening, movement detection, light, etc.).
     """
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     kind = request.POST.get('kind', None)
     data = request.POST.get('data', None)
+
     if kind is None or data is None:
         return HttpResponseBadRequest()
-    with open(DOORMAN_LOGFILE, 'a') as fh:
-        fh.write('%s %s %s\n' % (now, kind, data))
+
+    if kind == 'ping':
+        with open(DOORMAN_PING_LOGFILE, 'a') as fh:
+            fh.write('%s\n' % (now,))
+    else:
+        with open(DOORMAN_LOGFILE, 'a') as fh:
+            fh.write('%s %s %s\n' % (now, kind, data))
+
     return HttpResponse()
 
 

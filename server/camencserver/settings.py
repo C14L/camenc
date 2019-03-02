@@ -93,3 +93,5 @@ if ISDEV:
 else:
     PICS_DIR = '/opt/camenc/pics/'
 
+DOORMAN_LOGFILE = os.path.join(PICS_DIR, 'doorman.log')
+DOORMAN_PING_LOGFILE = os.path.join(PICS_DIR, 'doorman-ping.log')
