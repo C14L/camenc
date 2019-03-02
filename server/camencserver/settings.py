@@ -1,4 +1,5 @@
 import os
+import pathlib
 
 ISDEV = bool(os.environ.get('ISDEV'))
 
@@ -87,7 +88,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static_files')
 
 # # # # #
 
-PICS_DIR = '/tmp/pics' if ISDEV else '/opt/camenc/pics/'
-
-DOORMAN_LOGFILE = '/tmp/doorman.log' if ISDEV else '/opt/camenc/pics/doorman.log'
+if ISDEV:
+    PICS_DIR = os.path.join(BASE_DIR, '../pics/')
+else:
+    PICS_DIR = '/opt/camenc/pics/'
 
