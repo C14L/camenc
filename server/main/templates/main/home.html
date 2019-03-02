@@ -1,56 +1,13 @@
 {% extends "base.html" %}
 
+{% block h1extend %}activity{% endblock %}
+
 {% block main %}
 
-{% if messages %}
-<ul class="messages">
-    {% for message in messages %}
-    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
-        {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
-        {{ message }}
-    </li>
-    {% endfor %}
-</ul>
-{% endif %}
-
-<fieldset>
-  <legend>{{ cam.data.uid }}</legend>
-  <ul>
-  {% for x in doorman %}
-    <li>{{x}}</li>
-  {% endfor %}
-  </ul>
-</fieldset>
-
-{#
-{% for cam in cams %}
-<fieldset>
-  <legend>{{ cam.data.uid }}</legend>
-  <form method="POST" action="">
-    {% csrf_token %}
-    <input type="hidden" name="pk" value="{{ cam.data.id }}">
-    {{ cam.form.as_p }}
-    <button type="submit">speichern</button>
-  </form>
-  <ul>
-    <li>Last post: {{ cam.status.latest_post_date }}</li>
-    <li>Oldest post: {{ cam.status.oldest_post_date }}</li>
-    <li>Files count: {{ cam.status.files_count }}</li>
-    <li>Storage used: {{ cam.status.storage_gb_used }} GB</li>
-    <li>Storage free: {{ cam.status.storage_gb_free }} GB</li>
-    <li>Health level: {{ cam.status.health_percent }} %</li>
-  </ul>
-</fieldset>
+<ul>
+{% for x in doorman %}
+  <li>{{x}}</li>
 {% endfor %}
-
-<fieldset>
-  <legend>Neue Camera</legend>
-  <form method="POST" action="">
-    {% csrf_token %}
-    {{ new_cam_form.as_p }}
-    <button type="submit">speichern</button>
-  </form>
-</fieldset>
-#}
+</ul>
 
 {% endblock %}

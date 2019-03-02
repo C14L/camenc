@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block h1extend %}pics{% endblock %}
+
+{% block main %}
+
+<ul>
+{% for x in pics %}
+  <li><img src="{{x}}"/></li>
+{% endfor %}
+</ul>
+
+{% endblock %}

@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <style>
 
-header { overflow: hidden; }
-header h1 { float: left; }
-header form { float: right; margin: 12px; }
+header { overflow: hidden; margin: 0; padding: 0; }
+header h1 { float: left; font-size: 30px; line-height: 30px; margin: 8px; padding: 0; }
+header form { float: right; margin: 8px; padding: 0; }
 
 main fieldset {
     display: flex;
@@ -20,20 +20,35 @@ main fieldset ul {
   </head>
   <body>
     <header>
-      <h1>Camera settings</h1>
+      <h1><span>camenc</span><span>{% block h1extend %}{% endblock %}</span></h1>
       <form method="post" action="{% url 'user_logout' %}">
         {% csrf_token %}
         <input type="submit" value="Logout"/>
         <input type="hidden" name="next" value="/"/>
       </form>
     </header>
+
     <hr/>
+
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
+            {{ message }}
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
     <main>
       {% block main %}{% endblock %}
     </main>
+
     <hr/>
+
     <footer>
-      &copy; 2018
+      &copy; 2019
     </footer>
   </body>
 </html>
