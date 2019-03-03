@@ -1,23 +1,21 @@
 #!/bin/bash
 
-# The directory of the upload.sh script
 SRC=$( cd "$( dirname "$0" )"; pwd )
 
-# The destination server and directory
-DST="cst@89.110.147.123:/opt/camenc/"
+SVR="cst@89.110.147.123"
+DST="$SVR:/opt/camenc/"
 
 echo "${SRC} >>> ${DST}"
 read -rsp "Press [ENTER] to start..."
-
-#find ${SRC} -type d -print0 | xargs -0 chmod 755
-#find ${SRC} -type f -print0 | xargs -0 chmod 644
-#chmod -R 755 ${SRC}/*.sh
 
 rsync -rtvP \
     --delete \
     --exclude=__pycache__ \
     --exclude=*.swp \
+    --exclude=*.log \
+    --exclude=*.pyc \
     --exclude=db.sqlite3 \
-    ${SRC} \
-    ${DST}
+    ${SRC} ${DST}
 
+pass webdev/v874-server | head -n1 | ssh -tt ${SVR} \
+    "sudo supervisorctl restart camencserver && sudo service nginx restart"
