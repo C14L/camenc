@@ -35,20 +35,6 @@ MAX_FILES = 20000  # Max number of files kept in the pics dir. Oldest files are 
 
 @login_required
 def home(request, template='main/home.html'):
-    if request.method == 'POST':
-        if request.POST.get('pk'):
-            cam = Cam.objects.get(pk=request.POST['pk'])
-            form = CamForm(request.POST, instance=cam)
-            form.save()
-            messages.success(request, 'Cam aktualisiert.')
-        else:
-            form = CamForm(request.POST)
-            cam = form.save(commit=False)
-            cam.user = request.user
-            cam.save()
-            messages.success(request, 'Cam neu angelegt.')
-        return HttpResponseRedirect('/')
-
     cams = [
         {
             'data': x,
