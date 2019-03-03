@@ -38,19 +38,18 @@ def home(request, template='main/home.html'):
     cams = [
         {
             'data': x,
-            'form': CamForm(instance=x),
             'status': get_cam_status(x.uid),
         }
         for x in Cam.objects.filter(user=request.user)
     ]
 
-    doorman = get_doorman_log()
+    doorman = list(get_doorman_log())
     doorman.reverse()
 
     context = {
         'cams': cams,
-        'new_cam_form': CamForm(),
         'doorman': doorman,
+        'last_ping': get_doorman_last_ping(),
     }
 
     return render(request, template, context)
@@ -114,8 +113,8 @@ def add(request):
         for chunk in upload.chunks():
             fh.write(chunk)
 
-    # Randomly every 10th request check storage constrains.
-    if randint(0, 9) == 5:
+    # Randomly every 100th request check storage constrains.
+    if randint(0, 99) == 5:
         enforce_storage_constrains(data_dir, full_path)
 
     # Integrity check: verify file size if reasonable for an image.
@@ -151,6 +150,7 @@ def enforce_storage_constrains(data_dir, full_path):
             os.remove(f)
 
     # Integrity check: verify file size if reasonable for an image.
+    # TODO: this should be in its own function and checked for every uploaded file.
     file_size = os.path.getsize(full_path)  # Bytes
     if file_size < 10 * KiB:
         os.remove(full_path)  # delete faulty files.
@@ -164,13 +164,28 @@ def enforce_storage_constrains(data_dir, full_path):
     return HttpResponse()
 
 
-def get_doorman_log(head=None, tail=None):
+def get_doorman_log():
+    """Get doorman log entries.
+
+    Returns:
+        list of tuple: datetime, log message
+    """
     try:
         with open(DOORMAN_LOGFILE, 'r') as fh:
-            if head:
-                return list(fh.readlines())[:head]
-            elif tail:
-                return list(fh.readlines())[tail:]
-            return list(fh.readlines())
+            for row in fh:
+                yield (row[:19], row[20:])
     except FileNotFoundError:
-        return []
+        pass
+
+
+def get_doorman_pings():
+    try:
+        with open(DOORMAN_PING_LOGFILE, 'r') as fh:
+            for row in fh:
+                yield row
+    except FileNotFoundError:
+        pass
+
+
+def get_doorman_last_ping():
+    return list(get_doorman_pings())[-1]

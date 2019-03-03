@@ -1,12 +1,17 @@
 {% extends "base.html" %}
 
-{% block h1extend %}activity{% endblock %}
+{% block header %}
+  <span data-utc="{{last_ping}}" data-ago-live></span>
+{% endblock %}
 
 {% block main %}
 
 <ul>
 {% for x in doorman %}
-  <li>{{x}}</li>
+  <li>
+    <span data-utc="{{x.0}}">{{x.0}}</span>
+    <span class="msg">{{x.1}}</span>
+  </li>
 {% endfor %}
 </ul>
 

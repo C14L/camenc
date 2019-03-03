@@ -4,9 +4,10 @@
     <meta charset="utf-8">
     <style>
 
-header { overflow: hidden; margin: 0; padding: 0; }
-header h1 { float: left; font-size: 30px; line-height: 30px; margin: 8px; padding: 0; }
-header form { float: right; margin: 8px; padding: 0; }
+header { overflow: hidden; margin: 0; padding: 0; display: flex; }
+header h1 { font-size: 30px; line-height: 30px; margin: 8px; padding: 0; }
+header div { font-size: 16px; line-height: 30px; margin: 8px; padding: 0; }
+header form { margin: 8px; padding: 0; }
 
 main fieldset {
     display: flex;
@@ -20,7 +21,8 @@ main fieldset ul {
   </head>
   <body>
     <header>
-      <h1><span>camenc</span><span>{% block h1extend %}{% endblock %}</span></h1>
+      <h1>camenc</h1>
+      <div>{% block header %}{% endblock %}</div>
       <form method="post" action="{% url 'user_logout' %}">
         {% csrf_token %}
         <input type="submit" value="Logout"/>
@@ -51,4 +53,42 @@ main fieldset ul {
       &copy; 2019
     </footer>
   </body>
+  <script>
+
+function tick_time_ago() {
+  document.querySelectorAll('[data-utc][data-ago-live]').forEach(el => {
+    const now = Date.now();
+    const then = Date.parse(el.getAttribute('data-utc') + ' UTC');
+
+    var diff = Math.floor((now - then) / 1000);
+    var str = '';
+
+    const h = Math.floor(diff / 3600);
+    if (h) str += h + ' hours ';
+    diff = diff % 3600;
+
+    const m = Math.floor(diff / 60);
+    if (m) str += m + ' minutes ';
+    diff = diff % 60;
+
+    const s = Math.floor(diff);
+    str += s + ' seconds ';
+
+    el.innerHTML = `last ping ${str} ago`;
+
+    if (h) {
+      // panic if last ping is hours ago
+      el.style.color = 'red';
+      el.style.fontWeight = 'bold';
+    } else if (m > 10) {
+      // warn if last ping more than ten minutes ago
+      el.style.color = 'blue';
+    }
+  });
+}
+
+tick_time_ago();
+// setInterval(tick_time_ago, 1000);  --> only if ping time is updated via ajax from backend
+
+  </script>
 </html>
