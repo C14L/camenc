@@ -122,9 +122,7 @@ def add(request):
         print("Upload disabled.")
         return HttpResponseNotAllowed('Upload disabled.')
 
-    file_name = '{}.jpg.enc'.format(
-        int(time.time() * 1000)
-    )
+    file_name = '{}.jpg.enc'.format(datetime.now().isoformat('T'))
     full_path = os.path.join(data_dir, file_name)
     with open(full_path, 'wb+') as fh:
         for chunk in upload.chunks():
