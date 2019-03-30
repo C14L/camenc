@@ -32,15 +32,15 @@ while [ true ]; do
     THUMBFILE=$DATADIR/webcam-`date +%s`.preview.jpg
     FILENAME=$DATADIR/webcam-`date +%s`.jpg.enc
 
-    fswebcam -r $PICSIZE --skip 2 --jpeg 80 - | tee                                                 \
+    fswebcam -r $PICSIZE --skip 2 --jpeg 80 - 2>/dev/null | tee                                     \
         >(                                                                                          \
-            convert -resize $THUMBSIZE - - > $THUMBFILE 2>$ERRLOG &&                                \
+            convert -resize $THUMBSIZE - - > $THUMBFILE 2>$ERRLOG ;                                 \
             curl -m5 -F "uid=$HASH" -F "file=@$THUMBFILE" $POSTURL                                  \
         )                                                                                           \
         >(                                                                                          \
             openssl smime -encrypt -binary -aes-256-cbc -outform DER "$EXECDIR/public-key-a.pem" |  \
             openssl smime -encrypt -binary -aes-256-cbc -outform DER "$EXECDIR/public-key-b.pem" |  \
-            tee $FILENAME >/dev/null &&                                                             \
+            tee $FILENAME >/dev/null 2>$ERRLOG &&                                                   \
             curl -m5 -F "uid=$HASH" -F "file=@$FILENAME" $POSTURL                                   \
         )                                                                                           \
         >/dev/null 2>$ERRLOG
