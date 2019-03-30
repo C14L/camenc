@@ -95,71 +95,54 @@ def add(request):
 
     log.info('uid, upload.name: %s %s', uid, upload.name)
 
-    if not RE_VALID_UPLOAD_DIR.match(uid):
-        return HttpResponseBadRequest('Invalid upload data.')
-    #if not RE_VALID_UPLOAD_NAME.match(upload.name):
-    #     return HttpResponseBadRequest('Invalid upload data.')
+    upload_ext = upload.name[-3:]
 
-    data_dir = os.path.join(PICS_DIR, uid)
+    if upload_ext == 'enc':
+        name_tpl = '{}.jpg.enc'
+    elif upload_ext == 'jpg':
+        name_tpl = '{}.jpg'
+    else:
+        log.error('Invalid upload file name.')
+        return HttpResponseBadRequest('Invalid upload file name.')
+
+    if not RE_VALID_UPLOAD_DIR.match(uid):
+        log.error('Invalid upload data.')
+        return HttpResponseBadRequest('Invalid upload data.')
+
+    base_dir = os.path.join(PICS_DIR, uid)
+    data_dir = os.path.join(base_dir, 'full')
+    thumb_dir = os.path.join(base_dir, 'preview')
+
+    if not os.path.exists(base_dir):
+        os.mkdir(base_dir, 0o755)
     if not os.path.exists(data_dir):
         os.mkdir(data_dir, 0o755)
-    if os.path.exists(os.path.join(data_dir, '.upload-disabled')):
-        print("Upload disabled.")
+    if not os.path.exists(thumb_dir):
+        os.mkdir(thumb_dir, 0o755)
+    if os.path.exists(os.path.join(base_dir, '.upload-disabled')):
+        log.error('Upload disabled.')
         return HttpResponseNotAllowed('Upload disabled.')
 
-    file_name = '{}.jpg.enc'.format(datetime.now().isoformat('T'))
+    file_name = name_tpl.format(datetime.now().isoformat('T'))
     full_path = os.path.join(data_dir, file_name)
-    with open(full_path, 'wb+') as fh:
+    thumb_path = os.path.join(thumb_dir, file_name)
+
+    if upload_ext == 'enc':
+        target_f = full_path
+    elif upload_ext == 'jpg':
+        target_f = thumb_path
+
+    with open(target_f, 'wb+') as fh:
         for chunk in upload.chunks():
             fh.write(chunk)
 
-    # Randomly every 100th request check storage constrains.
-    if randint(0, 99) == 5:
-        enforce_storage_constrains(data_dir, full_path)
-
     # Integrity check: verify file size if reasonable for an image.
-    file_size = os.path.getsize(full_path)  # Bytes
-    if file_size < 10 * KiB:
-        return HttpResponseBadRequest('File size too small for a camenc image.')
-    if file_size > 500 * KiB:
-        os.remove(full_path)  # delete large files.
-        return HttpResponseBadRequest('File size too large for a camenc image.')
-
-    return HttpResponse()
-
-
-def enforce_storage_constrains(data_dir, full_path):
-    # Keep total file storage size within "max_gb".
-    pass
-
-    # Keep only files equal or younger than "max_days".
-    pass
-
-    # Keep number of files within "max_files".
-    diff = len(os.listdir(data_dir)) - MAX_FILES
-    if diff > 0:
-        # Delete `diff` oldest files.
-        li = [
-            (x.path, int(x.stat().st_ctime))
-            for x in os.scandir(data_dir)
-            if x.path.endswith('.enc')
-        ]
-        li.sort(key=lambda x: x[1])
-        li = li[:diff]  # only need the files with lowest timestamp vals
-        for f, _t in li:
-            os.remove(f)
-
-    # Integrity check: verify file size if reasonable for an image.
-    # TODO: this should be in its own function and checked for every uploaded file.
-    file_size = os.path.getsize(full_path)  # Bytes
-    if file_size < 10 * KiB:
-        os.remove(full_path)  # delete faulty files.
-        print("File size too small for a camenc image: {} Bytes".format(file_size))
-        return HttpResponseBadRequest('File size too small for a camenc image.')
-    if file_size > 500 * KiB:
-        os.remove(full_path)  # delete faulty files.
-        print("File size too large for a camenc image: {} Bytes".format(file_size))
-        return HttpResponseBadRequest('File size too large for a camenc image.')
+    if upload_ext == 'enc':
+        file_size = os.path.getsize(full_path)  # Bytes
+        if file_size > 1000 * KiB:
+            os.remove(full_path)  # delete large files.
+            log.error('File size too large for a camenc image.')
+            return HttpResponseBadRequest('File size too large for a camenc image.')
 
     return HttpResponse()
 
