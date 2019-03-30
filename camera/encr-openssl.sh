@@ -4,7 +4,7 @@ EXECDIR=/home/pi/dev/camenc/camera
 DATADIR=/home/pi/temp/raspicam
 ERRLOG=$DATADIR/error.log
 
-INTERVAL=2
+INTERVAL=5
 
 PICSIZE=1920x1080
 #PICSIZE=960x540
@@ -34,20 +34,20 @@ while [ true ]; do
 
     fswebcam -r $PICSIZE --skip 2 --jpeg 80 - 2>/dev/null | tee                                     \
         >(                                                                                          \
-            convert -resize $THUMBSIZE - - > $THUMBFILE 2>$ERRLOG ;                                 \
-            curl -m5 -F "uid=$HASH" -F "file=@$THUMBFILE" $POSTURL                                  \
+            convert -resize $THUMBSIZE - - > $THUMBFILE 2>$ERRLOG &&                                \
+            curl -m5 -F "uid=$HASH" -F "file=@$THUMBFILE" $POSTURL 2>$ERRLOG &&                     \
+            rm -f $THUMBFILE 2>$ERRLOG                                                              \
         )                                                                                           \
         >(                                                                                          \
             openssl smime -encrypt -binary -aes-256-cbc -outform DER "$EXECDIR/public-key-a.pem" |  \
             openssl smime -encrypt -binary -aes-256-cbc -outform DER "$EXECDIR/public-key-b.pem" |  \
             tee $FILENAME >/dev/null 2>$ERRLOG &&                                                   \
-            curl -m5 -F "uid=$HASH" -F "file=@$FILENAME" $POSTURL                                   \
+            curl -m5 -F "uid=$HASH" -F "file=@$FILENAME" $POSTURL 2>$ERRLOG &&                      \
+            rm -f "$FILENAME" 2>$ERRLOG                                                             \
         )                                                                                           \
         >/dev/null 2>$ERRLOG
 
     sleep $INTERVAL
-    rm -f "$THUMBFILE"
-    rm -f "$FILENAME"
 
 done
 
