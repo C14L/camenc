@@ -5,6 +5,18 @@
 {% endblock %}
 
 {% block main %}
+<style>
+ul.pp { list-style: none; display: block; padding: 0; margin: 0; }
+ul.pp > li { display: inline; padding: 0; margin: 0; }
+</style>
+
+<ul class="pp">
+{% for x in pics %}
+<li class="preview"><img title="{{x}}" src="/camenc/preview/{{x}}" /></li>
+{% endfor %}
+</ul>
+
+<hr>
 
 <ul>
 {% for x in doorman %}

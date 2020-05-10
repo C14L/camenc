@@ -35,24 +35,28 @@ MAX_FILES = 20000  # Max number of files kept in the pics dir. Oldest files are 
 
 @login_required
 def home(request, template='main/home.html'):
-    cams = [
-        {
-            'data': x,
-            'status': get_cam_status(x.uid),
-        }
-        for x in Cam.objects.filter(user=request.user)
-    ]
-
     doorman = list(get_doorman_log())
     doorman.reverse()
 
+    cams = list(request.user.cams.all())
+    pics = list(get_preview_files(cams[0].uid) if cams else [])
+    pics.sort(reverse=True)
+
     context = {
-        'cams': cams,
         'doorman': doorman,
         'last_ping': get_doorman_last_ping(),
+        'cams': cams,
+        'pics': pics[:1000],
     }
 
     return render(request, template, context)
+
+
+def get_preview_files(cam_id):
+    d = os.path.join(PICS_DIR, cam_id, 'preview')
+    for f in os.listdir(d):
+        if f.endswith('.jpg'):
+            yield f
 
 
 def get_cam_status(uid):
@@ -66,6 +70,9 @@ def get_cam_status(uid):
         # ...
     }
 
+###########################################################
+# Endpoints used by the Raspis
+###########################################################
 
 @csrf_exempt
 def doorman_add(request):
@@ -156,7 +163,8 @@ def get_doorman_log():
     try:
         with open(DOORMAN_LOGFILE, 'r') as fh:
             for row in fh:
-                yield (row[:19], row[20:])
+                if row and len(row) > 20:
+                    yield (row[:19], row[20:])
     except FileNotFoundError:
         pass
 
@@ -165,10 +173,13 @@ def get_doorman_pings():
     try:
         with open(DOORMAN_PING_LOGFILE, 'r') as fh:
             for row in fh:
-                yield row
+                if row:
+                    yield row
     except FileNotFoundError:
         pass
 
 
 def get_doorman_last_ping():
-    return list(get_doorman_pings())[-1]
+    d = list(get_doorman_pings())
+    return d[-1] if d else ''
+
