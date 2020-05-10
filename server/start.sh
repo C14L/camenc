@@ -1,8 +1,8 @@
 #!/bin/bash
 
 NAME="camencserver_app"
-USER=cst
-GROUP=cst
+USER=chris
+GROUP=chris
 
 DJANGODIR=/opt/camenc/server
 DJANGO_SETTINGS_MODULE=camencserver.settings

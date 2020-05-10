@@ -2,20 +2,12 @@
 
 SRC=$( cd "$( dirname "$0" )"; pwd )
 
-SVR="cst@89.110.147.123"
+SVR="chris@5.9.58.2"
 DST="$SVR:/opt/camenc/"
 
 echo "${SRC} >>> ${DST}"
-read -rsp "Press [ENTER] to start..."
+rsync -rtvP --delete --exclude=*.log --exclude=db.sqlite3 ${SRC} ${DST}
 
-rsync -rtvP \
-    --delete \
-    --exclude=__pycache__ \
-    --exclude=*.swp \
-    --exclude=*.log \
-    --exclude=*.pyc \
-    --exclude=db.sqlite3 \
-    ${SRC} ${DST}
+#pass webdev/server01-chris | head -n1 | ssh -tt ${SVR} \
+#    "sudo supervisorctl restart camencserver && sudo systemctl restart nginx"
 
-pass webdev/v874-server | head -n1 | ssh -tt ${SVR} \
-    "sudo supervisorctl restart camencserver && sudo service nginx restart"

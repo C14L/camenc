@@ -1,0 +1,9 @@
+[Unit]
+Description=django camenc socket
+
+[Socket]
+ListenStream=/run/camenc.socket
+
+[Install]
+WantedBy=sockets.target
+

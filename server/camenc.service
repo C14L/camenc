@@ -1,0 +1,26 @@
+[Unit]
+Description=django camenc service
+Requires=camenc.socket
+After=network.target
+
+[Service]
+PIDFile=/run/camenc.pid
+User=chris
+Group=chris
+RuntimeDirectory=gunicorn
+WorkingDirectory=/opt/camenc/server
+ExecStart=/home/chris/.virtualenvs/camenc/bin/gunicorn \
+    camencserver.wsgi:application \
+    --name camencserver \
+    --workers 1 \
+    --threads 4 \
+    --user=chris \
+    --group=chris \
+    --bind=unix:/run/camenc.socket
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+Restart=on-failure
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
