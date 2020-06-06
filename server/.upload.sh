@@ -2,12 +2,11 @@
 
 SRC=$( cd "$( dirname "$0" )"; pwd )
 
-SVR="chris@5.9.58.2"
+SVR="$SERVER01"
 DST="$SVR:/opt/camenc/"
 
 echo "${SRC} >>> ${DST}"
 rsync -rtvP --delete --exclude=*.log --exclude=db.sqlite3 ${SRC} ${DST}
 
-#pass webdev/server01-chris | head -n1 | ssh -tt ${SVR} \
-#    "sudo supervisorctl restart camencserver && sudo systemctl restart nginx"
+pass webdev/server01-chris | head -n1 | ssh -tt ${SVR} "sudo systemctl restart camenc.service"
 
