@@ -1,16 +1,16 @@
 import os
 import pathlib
 
-ISDEV = bool(os.environ.get('ISDEV'))
-
-DEBUG = ISDEV
-
+DEBUG = bool(os.environ.get("ISDEV"))
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = '438*qk@nur5+v_x#oa$cezqk49&worelm81rps+$g%x0-f%m@!'
+if DEBUG:
+    SECRET_KEY = '438*qk@nur5+v_x#oa$cezqk49&worelm81rps+$g%x0-f%m@!'
+else:
+    from .settings_production_private import *
 
 ALLOWED_HOSTS = [
-    '.c14l.com',
+    'c14l.com',
     '192.168.0.136',
     '127.0.0.1',
     'localhost',
@@ -88,7 +88,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static_files')
 
 # # # # #
 
-if ISDEV:
+if DEBUG:
     PICS_DIR = os.path.join(BASE_DIR, '../pics/')
 else:
     PICS_DIR = '/opt/camenc/pics/'
