@@ -6,13 +6,14 @@ import time
 from datetime import datetime
 from random import randint
 
-from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseBadRequest, \
-    HttpResponseNotAllowed, HttpResponseRedirect
-from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse, HttpResponseBadRequest, \
+        HttpResponseNotAllowed, HttpResponseRedirect
+from django.shortcuts import render
+from django.utils.datastructures import MultiValueDictKeyError
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import Cam
 from .forms import CamForm
@@ -97,7 +98,11 @@ def doorman_add(request):
 
 @csrf_exempt
 def add(request):
-    upload = request.FILES['file']
+    try:
+        upload = request.FILES['file']
+    except MultiValueDictKeyError:
+        return HttpResponseBadRequest('No upload file.')
+
     uid = request.POST['uid'][:32]
 
     log.info('uid, upload.name: %s %s', uid, upload.name)
