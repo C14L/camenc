@@ -14,8 +14,9 @@ rsync -rtvP --exclude=.git/ --exclude=.gitignore "${SRC}" "${DST}"
 
 ssh ${RASPI01} "\
   sudo ln -s ${DIR}/camera/camenc-camera.service /etc/systemd/system/ 2>/dev/null ; \
-  sudo systemctl restart camenc-camera.service ; \
   sudo ln -s ${DIR}/camera/camenc-cleanup.service /etc/systemd/system/ 2>/dev/null ; \
-  sudo systemctl restart camenc-cleanup.service ; \
+  sudo systemctl daemon-reload ; \
+  sudo systemctl restart camenc-camera.service ; \
+  sudo systemctl restart camenc-cleanup.service
 "
 

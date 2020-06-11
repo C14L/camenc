@@ -13,7 +13,8 @@ ssh ${RASPI03} "mkdir -p ${DIR}"
 rsync -rtvP --exclude=.git/ --exclude=.gitignore ${SRC} ${DST}
 
 ssh ${RASPI03} "\
-  sudo ln -s ${DIR}/camera/camenc-doorman.service /etc/systemd/system/ 2>/dev/null ; \
-  sudo systemctl restart camenc-doorman.service ; \
+  sudo ln -s ${DIR}/doorman/camenc-doorman.service /etc/systemd/system/ 2>/dev/null ; \
+  sudo systemctl daemon-reload ; \
+  sudo systemctl restart camenc-doorman.service
 "
 

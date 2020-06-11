@@ -2,7 +2,7 @@
 
 # Delete older local images from local SSD.
 
-EXECDIR=/home/pi/dev/camenc
+EXECDIR=/home/pi/camenc
 DATADIR=/home/pi/temp/raspicam
 INTERVAL=60
 MAXAGE=1440  # Maximum photo file age in minutes.

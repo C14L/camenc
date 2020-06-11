@@ -3,16 +3,10 @@ Description=camenc doorman service
 
 [Service]
 ExecStart=/home/pi/camenc/doorman/doorman.py
-# Disable Python's buffering of STDOUT and STDERR, so that output from the
-# service shows up immediately in systemd's logs
 Environment=PYTHONUNBUFFERED=1
-# Automatically restart the service if it crashes
 Restart=on-failure
-# Our service will notify systemd once it is up and running
-Type=notify
-# Use a dedicated user to run our service
 User=pi
 
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target
 

@@ -2,9 +2,12 @@
 Description=camenc cleanup service
 
 [Service]
-Type=simple
 ExecStart=/home/pi/camenc/camera/cleaner-upper.sh
+Environment=PYTHONUNBUFFERED=1
+Restart=on-failure
+Type=simple
+User=pi
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
 

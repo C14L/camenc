@@ -7,7 +7,7 @@
 # delete the files.
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-EXECDIR=/home/pi/dev/camenc/camera
+EXECDIR=/home/pi/camenc/camera
 DATADIR=/home/pi/temp/raspicam
 ERRLOG=$DATADIR/error.log
 
