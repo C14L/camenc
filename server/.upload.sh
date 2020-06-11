@@ -9,3 +9,4 @@ echo "${SRC} >>> ${DST}"
 rsync -rtvP --delete --exclude=*.log --exclude=db.sqlite3 --exclude=**/__pycache__ ${SRC} ${DST}
 
 pass webdev/server01-chris | head -n1 | ssh -tt ${SERVER01} "sudo systemctl restart camenc.service"
+
