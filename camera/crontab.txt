@@ -1,0 +1,7 @@
+
+SHELL=/bin/bash
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
+
+@reboot /home/pi/camenc/camera/encr-openssl.sh
+@reboot /home/pi/camenc/camera/cleaner-upper.sh
+

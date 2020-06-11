@@ -1,10 +1,17 @@
 #!/bin/bash
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# In regular intervals, take a picture. Encrypt it with the public keys found
+# in the same directory. Simultaneously crate a thumbnail size version of the
+# same picture unencrypted. Post both files to the /camenc/add route. Finally
+# delete the files.
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
 EXECDIR=/home/pi/dev/camenc/camera
 DATADIR=/home/pi/temp/raspicam
 ERRLOG=$DATADIR/error.log
 
-INTERVAL=5
+INTERVAL=5  # seconds to wait between photos
 
 PICSIZE=1920x1080
 #PICSIZE=960x540
@@ -13,20 +20,17 @@ THUMBSIZE=48x27
 
 CONFFILE=~/.camenc
 
-#POSTURL="http://192.168.0.94:7700/add"
+#POSTURL="http://192.168.0.94:7700/add"  # local testing
 POSTURL="https://c14l.com/camenc/add"
 
-#echo "Writing images to: $DATADIR until Ctrl+C is pressed ..."
-
-# Load or create a hash identifier for this device.
-#
+# Load or create a hash identifier for this device. This is the directory
+# where uploaded pictures from this device are stored.
 [ -f $CONFFILE ] && \
     HASH=$(cat $CONFFILE) || \
     HASH=$(echo "$(date) $(cat /sys/class/net/*/address)" | md5sum | cut -f1 -d' ') && \
     echo $HASH > $CONFFILE
 
 # Take pictures forever.
-#
 while [ true ]; do
 
     THUMBFILE=$DATADIR/webcam-`date +%s`.preview.jpg

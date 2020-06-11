@@ -1,0 +1,10 @@
+[Unit]
+Description=camenc cleanup service
+
+[Service]
+Type=simple
+ExecStart=/home/pi/camenc/camera/cleaner-upper.sh
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# Upload encrypted images.
-# Delete older local images.
+# Delete older local images from local SSD.
 
 EXECDIR=/home/pi/dev/camenc
 DATADIR=/home/pi/temp/raspicam

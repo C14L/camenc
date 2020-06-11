@@ -1,0 +1,10 @@
+[Unit]
+Description=camenc camera service
+
+[Service]
+Type=simple
+ExecStart=/home/pi/camenc/camera/encr-openssl.sh
+
+[Install]
+WantedBy=multi-user.target
+
